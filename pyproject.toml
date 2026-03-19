@@ -1,0 +1,30 @@
+[project]
+name = "python-admin"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "elias lee",email = "liyisheng0113@163.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.135.1,<0.136.0)",
+    "uvicorn (>=0.41.0,<0.42.0)",
+    "sqlalchemy (>=2.0.48,<3.0.0)",
+    "psycopg2-binary (>=2.9.11,<3.0.0)",
+    "python-jose (>=3.5.0,<4.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "redis (>=7.3.0,<8.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "alembic (>=1.18.4,<2.0.0)",
+    "scalar-fastapi (>=1.8.0,<2.0.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+# Use Poetry for dependency management only (application-style repo).
+package-mode = false

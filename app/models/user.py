@@ -25,7 +25,6 @@ class User(Base):
     phone: Mapped[str | None] = mapped_column(String(32))
 
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    password_salt: Mapped[str | None] = mapped_column(String(255))
 
     status: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

@@ -2,7 +2,7 @@ from sqlalchemy import text
 from app.core.config import get_settings
 from app.models.user import User
 from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate, UserUpdate, UserQuery
+from app.schemas.user import UserCreate, UserQuery, UserUpdate
 
 
 def _table_ref() -> str:
@@ -13,8 +13,14 @@ def _table_ref() -> str:
     return '"user"'
 
 
-def create_user(db: Session, user_in: UserCreate):
+def create_user(
+    db: Session,
+    user_in: UserCreate,
+    *,
+    password_hash: str,
+):
     data = user_in.model_dump()
+    data["password_hash"] = password_hash
     user = User(**data)
     db.add(user)
     db.commit()

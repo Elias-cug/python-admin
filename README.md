@@ -79,3 +79,11 @@ CRUD层
 Model层
 ↓
 Database
+
+## 开发顺序
+
+1. 设计数据库模型（Model层）
+2. 设计 schema（Pydantic模型）
+3. 实现CRUD操作（CRUD层）
+4. 编写业务逻辑（Service层）
+5. 定义API接口（API层）

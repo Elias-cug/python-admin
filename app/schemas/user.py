@@ -4,7 +4,47 @@ from datetime import datetime
 
 from pydantic import Field, ValidationInfo, field_serializer, field_validator
 
+from app.core.exceptions import BusinessError
+
 from .common import BaseSchema, ListQuerySchema
+
+
+class UserCreate(BaseSchema):
+    tenant_id: int
+    username: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    display_name: str | None = None
+    avatar_url: str | None = None
+    status: int | None = None
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def _emial_validate(cls, v):
+        if isinstance(v, str) and not "@" in v:
+            raise BusinessError("emial格式不对")
+        return v
+
+
+class UserCreateResponse(BaseSchema):
+    id: int | None = None
+    tenant_id: int | None = None
+    username: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    display_name: str | None = None
+    avatar_url: str | None = None
+    status: int | None = None
+
+
+class UserUpdate(BaseSchema):
+    id: int
+    tenant_id: int
+    email: str | None = None
+    phone: str | None = None
+    display_name: str | None = None
+    avatar_url: str | None = None
+    status: int | None = None
 
 
 class UserQuery(ListQuerySchema):
@@ -40,37 +80,6 @@ class UserQuery(ListQuerySchema):
                 )
             return datetime.fromisoformat(s)
         return v
-
-
-class UserCreateResponse(BaseSchema):
-    id: int | None = None
-    tenant_id: int | None = None
-    username: str | None = None
-    email: str | None = None
-    phone: str | None = None
-    display_name: str | None = None
-    avatar_url: str | None = None
-    status: int | None = None
-
-
-class UserCreate(BaseSchema):
-    tenant_id: int
-    username: str | None = None
-    email: str | None = None
-    phone: str | None = None
-    display_name: str | None = None
-    avatar_url: str | None = None
-    status: int | None = None
-
-
-class UserUpdate(BaseSchema):
-    id: int
-    tenant_id: int
-    email: str | None = None
-    phone: str | None = None
-    display_name: str | None = None
-    avatar_url: str | None = None
-    status: int | None = None
 
 
 class UserListItem(BaseSchema):

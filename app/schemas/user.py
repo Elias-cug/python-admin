@@ -101,3 +101,21 @@ class UserListItem(BaseSchema):
         if v is None:
             return None
         return v.strftime("%Y-%m-%d %H:%M:%S")
+
+
+class UserChangePassword(BaseSchema):
+    user_id: int = Field(..., description="user id")
+    old_password: str = Field(..., min_length=1, description="old password")
+    new_password: str = Field(..., min_length=8, description="new password")
+
+    @field_validator("new_password")
+    @classmethod
+    def _new_password_not_empty(cls, v: str):
+        if not v.strip():
+            raise BusinessError("新密码不能为空")
+        return v
+
+
+class UserResetPassword(BaseSchema):
+    user_id: int = Field(..., description="user id")
+    # Reset always uses DEFAULT_INITIAL_PASSWORD; no custom password accepted.

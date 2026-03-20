@@ -10,6 +10,8 @@ from app.schemas.user import (
     UserCreateResponse,
     UserCreate,
     UserUpdate,
+    UserChangePassword,
+    UserResetPassword,
 )
 from app.schemas.common import PageData, SuccessResponse
 from app.services.user_service import (
@@ -18,6 +20,8 @@ from app.services.user_service import (
     list_user_service,
     create_user_service,
     update_user_service,
+    change_password_service,
+    reset_password_service,
 )
 from app.core.response import success, page_success
 
@@ -58,6 +62,26 @@ def create_user_api(user_in: UserUpdate, db: Session = Depends(get_db)):
 def list_user_api(user_in: UserQuery, db: Session = Depends(get_db)):
     rows, total = list_user_service(db, user_in)
     return page_success(rows, total)
+
+
+@router.post(
+    "/changePassword",
+    summary="修改密码",
+    response_model=SuccessResponse[dict],
+)
+def change_password_api(change_in: UserChangePassword, db: Session = Depends(get_db)):
+    change_password_service(db, change_in)
+    return success(message="密码修改成功")
+
+
+@router.post(
+    "/resetPassword",
+    summary="重置密码",
+    response_model=SuccessResponse[dict],
+)
+def reset_password_api(reset_in: UserResetPassword, db: Session = Depends(get_db)):
+    reset_password_service(db, reset_in)
+    return success(message="密码重置成功")
 
 
 @router.post(

@@ -52,6 +52,17 @@ def update_user(db: Session, user_in: UserUpdate):
     return user
 
 
+def update_user_password(db: Session, user_id: int, *, password_hash: str) -> User | None:
+    user = get_user(db, user_id)
+    if not user:
+        return None
+
+    user.password_hash = password_hash
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def get_user(db: Session, user_id: int) -> User | None:
     user = db.query(User).filter(User.id == user_id, User.is_deleted == False).first()
     return user

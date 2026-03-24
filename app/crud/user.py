@@ -3,6 +3,7 @@ from app.core.config import get_settings
 from app.models.user import User
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserQuery, UserUpdate
+from datetime import datetime
 
 
 def _table_ref() -> str:
@@ -19,7 +20,8 @@ def create_user(
     *,
     password_hash: str,
 ):
-    data = user_in.model_dump()
+    # Exclude None so DB defaults (e.g. status=1) can apply.
+    data = user_in.model_dump(exclude_none=True)
     data["password_hash"] = password_hash
     user = User(**data)
     db.add(user)
@@ -52,12 +54,41 @@ def update_user(db: Session, user_in: UserUpdate):
     return user
 
 
-def update_user_password(db: Session, user_id: int, *, password_hash: str) -> User | None:
+_UNSET = object()
+
+
+def update_user_password(
+    db: Session,
+    user_id: int,
+    *,
+    password_hash: str,
+    password_updated_at: datetime | object = _UNSET,
+    is_password_changed: bool | object = _UNSET,
+    is_first_login: bool | object = _UNSET,
+    login_failed_count: int | object = _UNSET,
+    last_login_failed_at: datetime | None | object = _UNSET,
+    is_locked: bool | object = _UNSET,
+    locked_until: datetime | None | object = _UNSET,
+) -> User | None:
     user = get_user(db, user_id)
     if not user:
         return None
 
     user.password_hash = password_hash
+    if password_updated_at is not _UNSET:
+        user.password_updated_at = password_updated_at  # type: ignore[assignment]
+    if is_password_changed is not _UNSET:
+        user.is_password_changed = is_password_changed  # type: ignore[assignment]
+    if is_first_login is not _UNSET:
+        user.is_first_login = is_first_login  # type: ignore[assignment]
+    if login_failed_count is not _UNSET:
+        user.login_failed_count = login_failed_count  # type: ignore[assignment]
+    if last_login_failed_at is not _UNSET:
+        user.last_login_failed_at = last_login_failed_at  # type: ignore[assignment]
+    if is_locked is not _UNSET:
+        user.is_locked = is_locked  # type: ignore[assignment]
+    if locked_until is not _UNSET:
+        user.locked_until = locked_until  # type: ignore[assignment]
     db.commit()
     db.refresh(user)
     return user

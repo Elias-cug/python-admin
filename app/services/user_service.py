@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BusinessError
@@ -44,7 +46,18 @@ def change_password_service(db: Session, change_in: UserChangePassword):
         raise BusinessError("新密码不能与旧密码相同")
 
     new_hash = hash_password(change_in.new_password)
-    updated = update_user_password(db, change_in.user_id, password_hash=new_hash)
+    updated = update_user_password(
+        db,
+        change_in.user_id,
+        password_hash=new_hash,
+        password_updated_at=datetime.now(),
+        is_password_changed=True,
+        is_first_login=False,
+        login_failed_count=0,
+        last_login_failed_at=None,
+        is_locked=False,
+        locked_until=None,
+    )
     return updated
 
 
@@ -54,7 +67,18 @@ def reset_password_service(db: Session, reset_in: UserResetPassword):
         raise BusinessError("用户不存在")
 
     new_hash = hash_password(DEFAULT_INITIAL_PASSWORD)
-    updated = update_user_password(db, reset_in.user_id, password_hash=new_hash)
+    updated = update_user_password(
+        db,
+        reset_in.user_id,
+        password_hash=new_hash,
+        password_updated_at=datetime.now(),
+        is_password_changed=False,
+        is_first_login=True,
+        login_failed_count=0,
+        last_login_failed_at=None,
+        is_locked=False,
+        locked_until=None,
+    )
     return updated
 
 

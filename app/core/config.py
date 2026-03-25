@@ -18,6 +18,13 @@ def _load_env() -> None:
 class Settings:
     database_url: str
     db_schema: str | None = None
+    jwt_secret: str | None = None
+    jwt_algorithm: str = "HS256"
+    access_token_exp_minutes: int = 15
+    refresh_token_exp_days: int = 14
+    redis_url: str | None = None
+    login_lock_threshold: int = 5
+    login_lock_minutes: int = 5
 
 
 def _build_database_url() -> str:
@@ -54,4 +61,11 @@ def get_settings() -> Settings:
     return Settings(
         database_url=_build_database_url(),
         db_schema=os.getenv("DB_SCHEMA") or None,
+        jwt_secret=os.getenv("JWT_SECRET"),
+        jwt_algorithm=os.getenv("JWT_ALG", "HS256"),
+        access_token_exp_minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15")),
+        refresh_token_exp_days=int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "14")),
+        redis_url=os.getenv("REDIS_URL"),
+        login_lock_threshold=int(os.getenv("LOGIN_LOCK_THRESHOLD", "5")),
+        login_lock_minutes=int(os.getenv("LOGIN_LOCK_MINUTES", "5")),
     )

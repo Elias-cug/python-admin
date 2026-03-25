@@ -1,9 +1,10 @@
+from datetime import datetime
+
 from sqlalchemy import text
 from app.core.config import get_settings
 from app.models.user import User
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserQuery, UserUpdate
-from datetime import datetime
 
 
 def _table_ref() -> str:
@@ -19,10 +20,16 @@ def create_user(
     user_in: UserCreate,
     *,
     password_hash: str,
+    created_by: int | None = None,
+    updated_by: int | None = None,
 ):
     # Exclude None so DB defaults (e.g. status=1) can apply.
     data = user_in.model_dump(exclude_none=True)
     data["password_hash"] = password_hash
+    if created_by is not None:
+        data["created_by"] = created_by
+    if updated_by is not None:
+        data["updated_by"] = updated_by
     user = User(**data)
     db.add(user)
     db.commit()
@@ -30,18 +37,20 @@ def create_user(
     return user
 
 
-def del_user(db: Session, user_id: int):
+def del_user(db: Session, user_id: int, *, updated_by: int | None = None):
     user = get_user(db, user_id)
     if not user:
         return None
 
     user.is_deleted = True
+    if updated_by is not None:
+        user.updated_by = updated_by
     db.commit()
     db.refresh(user)
     return user
 
 
-def update_user(db: Session, user_in: UserUpdate):
+def update_user(db: Session, user_in: UserUpdate, *, updated_by: int | None = None):
     user = get_user(db, user_in.id)
     if not user:
         return None
@@ -49,6 +58,8 @@ def update_user(db: Session, user_in: UserUpdate):
     for field, value in user_in.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
 
+    if updated_by is not None:
+        user.updated_by = updated_by
     db.commit()
     db.refresh(user)
     return user
@@ -62,6 +73,7 @@ def update_user_password(
     user_id: int,
     *,
     password_hash: str,
+    updated_by: int | None = None,
     password_updated_at: datetime | object = _UNSET,
     is_password_changed: bool | object = _UNSET,
     is_first_login: bool | object = _UNSET,
@@ -89,6 +101,8 @@ def update_user_password(
         user.is_locked = is_locked  # type: ignore[assignment]
     if locked_until is not _UNSET:
         user.locked_until = locked_until  # type: ignore[assignment]
+    if updated_by is not None:
+        user.updated_by = updated_by
     db.commit()
     db.refresh(user)
     return user
@@ -97,6 +111,18 @@ def update_user_password(
 def get_user(db: Session, user_id: int) -> User | None:
     user = db.query(User).filter(User.id == user_id, User.is_deleted == False).first()
     return user
+
+
+def get_user_by_username(db: Session, tenant_id: int, username: str) -> User | None:
+    return (
+        db.query(User)
+        .filter(
+            User.tenant_id == tenant_id,
+            User.username == username,
+            User.is_deleted == False,
+        )
+        .first()
+    )
 
 
 def list_user(db: Session, user_in: UserQuery):

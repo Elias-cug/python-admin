@@ -7,7 +7,7 @@ from app.api.deps import get_current_user, get_db
 from app.core.response import success
 from app.schemas.auth import LoginIn, LoginOut, LogoutIn, RefreshIn, RefreshOut
 from app.schemas.common import SuccessResponse
-from app.schemas.user import UserListItem
+from app.schemas.user import UserOut
 from app.services.auth_service import login_service, logout_service, refresh_service
 
 
@@ -35,6 +35,6 @@ def logout_api(logout_in: LogoutIn):
     return success(message="退出成功")
 
 
-@router.get("/me", summary="当前用户", response_model=SuccessResponse[UserListItem])
+@router.get("/me", summary="当前用户", response_model=SuccessResponse[UserOut])
 def me_api(current_user=Depends(get_current_user)):
     return success(current_user)

@@ -6,13 +6,13 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_db
 from app.models.user import User
 from app.schemas.user import (
-    UserListItem,
-    UserQuery,
-    UserCreateResponse,
-    UserCreate,
-    UserUpdate,
-    UserChangePassword,
-    UserResetPassword,
+    UserOut,
+    UserQueryIn,
+    UserCreateOut,
+    UserCreateIn,
+    UserUpdateIn,
+    UserChangePasswordIn,
+    UserResetPasswordIn,
 )
 from app.schemas.common import PageData, SuccessResponse
 from app.services.user_service import (
@@ -30,10 +30,10 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post(
-    "/create", summary="创建用户", response_model=SuccessResponse[UserCreateResponse]
+    "/create", summary="创建用户", response_model=SuccessResponse[UserCreateOut]
 )
 def create_user_api(
-    user_in: UserCreate,
+    user_in: UserCreateIn,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -44,7 +44,7 @@ def create_user_api(
 @router.post(
     "/delete/{user_id}",
     summary="删除用户",
-    response_model=SuccessResponse[UserListItem],
+    response_model=SuccessResponse[UserOut],
 )
 def del_user_api(
     user_id: int,
@@ -56,10 +56,10 @@ def del_user_api(
 
 
 @router.post(
-    "/update", summary="更新用户", response_model=SuccessResponse[UserCreateResponse]
+    "/update", summary="更新用户", response_model=SuccessResponse[UserCreateOut]
 )
 def update_user_api(
-    user_in: UserUpdate,
+    user_in: UserUpdateIn,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -70,10 +70,10 @@ def update_user_api(
 @router.post(
     "/getUserList",
     summary="获取用户列表",
-    response_model=SuccessResponse[PageData[UserListItem]],
+    response_model=SuccessResponse[PageData[UserOut]],
 )
 def list_user_api(
-    user_in: UserQuery,
+    user_in: UserQueryIn,
     db: Session = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ):
@@ -87,7 +87,7 @@ def list_user_api(
     response_model=SuccessResponse[dict],
 )
 def change_password_api(
-    change_in: UserChangePassword,
+    change_in: UserChangePasswordIn,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -101,7 +101,7 @@ def change_password_api(
     response_model=SuccessResponse[dict],
 )
 def reset_password_api(
-    reset_in: UserResetPassword,
+    reset_in: UserResetPasswordIn,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -110,7 +110,7 @@ def reset_password_api(
 
 
 @router.post(
-    "/{user_id}", summary="获取用户详情", response_model=SuccessResponse[UserListItem]
+    "/{user_id}", summary="获取用户详情", response_model=SuccessResponse[UserOut]
 )
 def get_user_api(
     user_id: int,

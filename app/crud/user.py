@@ -4,7 +4,7 @@ from sqlalchemy import text
 from app.core.config import get_settings
 from app.models.user import User
 from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate, UserQuery, UserUpdate
+from app.schemas.user import UserCreateIn, UserQueryIn, UserUpdateIn
 
 
 def _table_ref() -> str:
@@ -17,7 +17,7 @@ def _table_ref() -> str:
 
 def create_user(
     db: Session,
-    user_in: UserCreate,
+    user_in: UserCreateIn,
     *,
     password_hash: str,
     created_by: int | None = None,
@@ -50,7 +50,9 @@ def del_user(db: Session, user_id: int, *, updated_by: int | None = None):
     return user
 
 
-def update_user(db: Session, user_in: UserUpdate, *, updated_by: int | None = None):
+def update_user(
+    db: Session, user_in: UserUpdateIn, *, updated_by: int | None = None
+):
     user = get_user(db, user_in.id)
     if not user:
         return None
@@ -125,7 +127,7 @@ def get_user_by_username(db: Session, tenant_id: int, username: str) -> User | N
     )
 
 
-def list_user(db: Session, user_in: UserQuery):
+def list_user(db: Session, user_in: UserQueryIn):
     tbl = _table_ref()
 
     where_parts: list[str] = ["is_deleted IS FALSE"]

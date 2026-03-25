@@ -9,7 +9,7 @@ from app.core.exceptions import BusinessError
 from .common import BaseSchema, ListQuerySchema
 
 
-class UserCreate(BaseSchema):
+class UserCreateIn(BaseSchema):
     tenant_id: int
     username: str | None = None
     email: str | None = None
@@ -26,7 +26,7 @@ class UserCreate(BaseSchema):
         return v
 
 
-class UserCreateResponse(BaseSchema):
+class UserCreateOut(BaseSchema):
     id: int | None = None
     tenant_id: int | None = None
     username: str | None = None
@@ -37,7 +37,7 @@ class UserCreateResponse(BaseSchema):
     status: int | None = None
 
 
-class UserUpdate(BaseSchema):
+class UserUpdateIn(BaseSchema):
     id: int
     tenant_id: int
     email: str | None = None
@@ -47,7 +47,7 @@ class UserUpdate(BaseSchema):
     status: int | None = None
 
 
-class UserQuery(ListQuerySchema):
+class UserQueryIn(ListQuerySchema):
     tenant_id: int | None = None
     username: str | None = None
     email: str | None = None
@@ -82,7 +82,7 @@ class UserQuery(ListQuerySchema):
         return v
 
 
-class UserListItem(BaseSchema):
+class UserOut(BaseSchema):
     id: int
     tenant_id: int
     username: str
@@ -103,7 +103,7 @@ class UserListItem(BaseSchema):
         return v.strftime("%Y-%m-%d %H:%M:%S")
 
 
-class UserChangePassword(BaseSchema):
+class UserChangePasswordIn(BaseSchema):
     user_id: int = Field(..., description="user id")
     old_password: str = Field(..., min_length=1, description="old password")
     new_password: str = Field(..., min_length=8, description="new password")
@@ -116,6 +116,6 @@ class UserChangePassword(BaseSchema):
         return v
 
 
-class UserResetPassword(BaseSchema):
+class UserResetPasswordIn(BaseSchema):
     user_id: int = Field(..., description="user id")
     # Reset always uses DEFAULT_INITIAL_PASSWORD; no custom password accepted.

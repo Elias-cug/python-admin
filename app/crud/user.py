@@ -50,9 +50,7 @@ def del_user(db: Session, user_id: int, *, updated_by: int | None = None):
     return user
 
 
-def update_user(
-    db: Session, user_in: UserUpdateIn, *, updated_by: int | None = None
-):
+def update_user(db: Session, user_in: UserUpdateIn, *, updated_by: int | None = None):
     user = get_user(db, user_in.id)
     if not user:
         return None

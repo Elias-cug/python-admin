@@ -14,6 +14,7 @@ class LoginIn(BaseSchema):
 class TokenPair(BaseSchema):
     access_token: str
     refresh_token: str
+    token_type: str = Field("bearer", description="token type")
     expires_in: int = Field(..., description="access token ttl (seconds)")
 
 
@@ -32,4 +33,3 @@ class RefreshOut(TokenPair):
 
 class LogoutIn(BaseSchema):
     refresh_token: str = Field(..., min_length=1)
-

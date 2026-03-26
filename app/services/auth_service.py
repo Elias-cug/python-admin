@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
@@ -24,6 +25,10 @@ def _now() -> datetime:
 
 def _refresh_key(jti: str) -> str:
     return f"auth:refresh:{jti}"
+
+
+def _access_blacklist_key(jti: str) -> str:
+    return f"auth:access:blacklist:{jti}"
 
 
 def login_service(db: Session, login_in: LoginIn, *, client_ip: str | None) -> LoginOut:
@@ -93,6 +98,7 @@ def login_service(db: Session, login_in: LoginIn, *, client_ip: str | None) -> L
     return LoginOut(
         access_token=access_token,
         refresh_token=refresh_token,
+        token_type="bearer",
         expires_in=expires_in,
         user_id=int(user.id),
         must_change_password=must_change_password,
@@ -143,6 +149,7 @@ def refresh_service(db: Session, refresh_token: str) -> RefreshOut:
     return RefreshOut(
         access_token=new_access,
         refresh_token=new_refresh,
+        token_type="bearer",
         expires_in=expires_in,
     )
 
@@ -162,3 +169,35 @@ def logout_service(refresh_token: str) -> None:
     r = get_redis()
     r.delete(_refresh_key(jti))
 
+
+def logout_strong_service(*, refresh_token: str, access_token: str | None) -> None:
+    # Always revoke refresh so session cannot be continued.
+    logout_service(refresh_token)
+
+    if not access_token:
+        return
+
+    try:
+        payload = decode_token(access_token)
+    except Exception:
+        return
+
+    if payload.get("type") != "access":
+        return
+
+    jti = payload.get("jti")
+    exp = payload.get("exp")
+    if not jti or not exp:
+        return
+
+    try:
+        exp_ts = int(exp)
+    except (TypeError, ValueError):
+        return
+
+    ttl = exp_ts - int(time.time())
+    if ttl <= 0:
+        return
+
+    r = get_redis()
+    r.setex(_access_blacklist_key(jti), ttl, "1")

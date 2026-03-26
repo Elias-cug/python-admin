@@ -16,7 +16,6 @@ class UserCreateIn(BaseSchema):
     phone: str | None = None
     display_name: str | None = None
     avatar_url: str | None = None
-    status: int | None = None
 
     @field_validator("email", mode="before")
     @classmethod

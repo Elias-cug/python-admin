@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.core.exceptions import BusinessError
+from app.core.redis_client import get_redis
 from app.core.security import decode_token
 from app.crud.user import get_user
 
@@ -46,6 +47,12 @@ def get_current_user(
 
     if not user_id or not tenant_id:
         raise BusinessError("无效token", code=401)
+
+    jti = payload.get("jti")
+    if jti:
+        r = get_redis()
+        if r.get(f"auth:access:blacklist:{jti}"):
+            raise BusinessError("token已失效，请重新登录", code=401)
 
     user = get_user(db, user_id)
     if not user or int(user.tenant_id) != tenant_id:
